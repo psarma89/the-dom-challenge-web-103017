@@ -7,74 +7,97 @@ let pauseButton = document.getElementById('pause')
 let commentList = document.getElementById('list')
 let submitButton = document.getElementById('submit')
 let input = document.querySelector('form#comment-form input')
-// let likesHash = {}
-
+let likesHash = {"0":0}
 let ticker;
+
+function incrementCounter(){
+  counter.innerText = (parseInt(counter.innerText) +  1).toString();
+}
+
+function decrementCounter(){
+  counter.innerText = (parseInt(counter.innerText) -  1).toString();
+}
+
+function heartComment(){
+  return `${counter.innerText} has been liked ${likesHash[counter.innerText]}`
+}
+
 function tickerFunc(){
   ticker = setInterval(function(){
-  counter.innerText = (parseInt(counter.innerText) +  1).toString();
+  // console.log(likesHash)
+  incrementCounter()
+  likesHash[counter.innerText] = 0;
   },1000)
   // likesHash[counter.innerText] = 0
 }
 
-submitButton.addEventListener('click', function(e){
-  e.preventDefault()
-  if (input.value){
-    let comment = document.createElement('p')
-    let textNode = document.createTextNode(input.value)
-    comment.appendChild(textNode)
-    commentList.appendChild(comment)
-  }
-})
+function commentLi(){
+  let li = document.createElement('li')
+  // let textNode = heartComment()
+  // li.appendChild(textNode)
+  li.innerText = heartComment()
+  li.setAttribute("id", `counter-${counter.innerText}`)
+  return li
+}
+
+function pause(){
+  dec.disabled = true
+  inc.disabled = true
+  heart.disabled = true
+  pauseButton.innerText = "resume"
+}
+
+function resume(){
+  dec.disabled = false
+  inc.disabled = false
+  heart.disabled = false
+  pauseButton.innerText = "pause"
+}
 
 //Don't need event if not using it
-window.addEventListener('load', function(){
-  // console.log("something")
-  tickerFunc()
-})
+window.addEventListener('load', tickerFunc)
 
 
-dec.addEventListener('click', function () {
-  // console.log("something")
-  if (parseInt(counter.innerText) > 0) {
-    counter.innerText = (parseInt(counter.innerText) - 1).toString();
-  }
-})
+inc.addEventListener('click', () => incrementCounter())
 
-inc.addEventListener('click', function () {
-  // console.log("something")
-  counter.innerText = (parseInt(counter.innerText) + 1).toString();
-})
+dec.addEventListener('click', () => decrementCounter())
 
 heart.addEventListener('click', function(){
   let ul = document.querySelector('ul.likes')
-  // likesHash[counter.innerText] += 1
+  // console.log(likesHash[counter.innerText])
+  likesHash[counter.innerText] += 1
+  // console.log(likesHash)
   if (ul) {
-    let li = document.createElement('li')
-    let textNode = document.createTextNode(`${counter.innerText} has been liked 1 time`)
-    li.appendChild(textNode)
-    ul.appendChild(li)
+    let li = document.getElementById(`counter-${counter.innerText}`)
+    if (li){
+      li.innerText = heartComment()
+    }else{
+      ul.appendChild(commentLi())
+    }
   }else {
     let ul = document.createElement('ul')
-    let li = document.createElement('li')
-    let textNode = document.createTextNode(`${counter.innerText} has been liked 1 time`)
-    li.appendChild(textNode)
-    ul.appendChild(li)
+    ul.appendChild(commentLi())
   }
 })
 
 pauseButton.addEventListener('click', function(){
   if (pauseButton.innerText === "pause") {
     clearInterval(ticker)
-    dec.disabled = true
-    inc.disabled = true
-    heart.disabled = true
-    pauseButton.innerText = "resume"
+    pause()
   }else {
-    dec.disabled = false
-    inc.disabled = false
-    heart.disabled = false
-    pauseButton.innerText = "pause"
+    resume()
     tickerFunc()
+  }
+})
+
+submitButton.addEventListener('click', function(e){
+  e.preventDefault()
+  if (input.value){
+    let comment = document.createElement('p')
+    // let textNode = document.createTextNode(input.value)
+    // comment.appendChild(textNode)
+    comment.innerText = input.value
+    commentList.appendChild(comment)
+    input.value = ""
   }
 })
